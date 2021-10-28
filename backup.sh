@@ -1,21 +1,50 @@
 #!/bin/bash
 
-MCRCON=/opt/minecraft-backup/mcrcon
-MCDIR=/home/david/minecraft-derpcraft
+BACKUPS_TO_KEEP=100
+BACKUP_TYPE=$1
+
+if [ -z "${BACKUP_TYPE}" ]
+then
+  echo "No BACKUP_TYPE specified. Choices are hourly, daily, or monthly."
+  exit 1
+fi
+
+if [ "hourly" = "${BACKUP_TYPE}" ]
+then
+  BACKUPS_TO_KEEP=23
+elif [ "daily" = "${BACKUP_TYPE}" ]
+then
+  BACKUPS_TO_KEEP=6
+elif [ "monthly" = "${BACKUP_TYPE}" ]
+then
+  BACKUPS_TO_KEEP=6
+else
+  echo "Invalid BACKUP_TYPE given: ${BACKUP_TYPE}. Choices are hourly, daily, or monthly."
+  exit 2
+fi
+
+MCRCON=/opt/mcrcon/mcrcon
+MCDIR=/opt/vanilla_minecraft
+BACKUP_DIR="/minecraft_backups/${BACKUP_TYPE}"
 
 RCONHOST=localhost
-RCONPORT=1234
+RCONPORT=25575
 RCONPASS=mypassword
 
-# Delete any backups older than 6 hours
-/usr/bin/find /opt/minecraft-backup/ -type f -mmin +360 -iname 'minecraft-derpcraft-backup*' -delete
+# Make sure the backup directory exists
+mkdir -p "${BACKUP_DIR}"
+
+# Delete old backups, keeping BACKUPS_TO_KEEP
+pushd "${BACKUP_DIR}"
+ls -1tr | head -n -"${BACKUPS_TO_KEEP}" | xargs -d '\n' rm -f --
+popd
 
 START=`date +%s`
-$MCRCON -H $RCONHOST -P $RCONPORT -p $RCONPASS "say Starting backup"
+$MCRCON -H $RCONHOST -P $RCONPORT -p $RCONPASS "say Starting ${BACKUP_TYPE} backup"
 $MCRCON -H $RCONHOST -P $RCONPORT -p $RCONPASS "save-off"
 $MCRCON -H $RCONHOST -P $RCONPORT -p $RCONPASS "save-all"
 
-/bin/tar -cpzf /opt/minecraft-backup/minecraft-derpcraft-backup-$(date +"%Y-%m-%d-%H-%M").tar.gz $MCDIR
+/bin/tar -cpzf $BACKUP_DIR/minecraft-${BACKUP_TYPE}-backup-$(date +"%Y-%m-%d-%H-%M").tar.gz $MCDIR
 
 $MCRCON -H $RCONHOST -P $RCONPORT -p $RCONPASS "save-on"
 
