@@ -1,0 +1,7 @@
+[Unit]
+Description="The Minecraft hourly backup"
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/minecraft/backup.sh hourly

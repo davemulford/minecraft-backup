@@ -1,0 +1,10 @@
+[Unit]
+Description="Runs the Minecraft monthly backup"
+Wants=network-online.target
+
+[Timer]
+OnCalendar=Monthly UTC
+Unit=minecraft-monthly-backup.service
+
+[Install]
+WantedBy=multi-user.target

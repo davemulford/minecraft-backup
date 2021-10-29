@@ -1,0 +1,10 @@
+[Unit]
+Description="Runs the Minecraft hourly backup"
+Wants=network-online.target
+
+[Timer]
+OnCalendar=Hourly UTC
+Unit=minecraft-hourly-backup.service
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,7 @@
+[Unit]
+Description="Uhe Minecraft monthly backup"
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/minecraft/backup.sh monthly
